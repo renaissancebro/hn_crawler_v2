@@ -1,0 +1,5 @@
+*.csv
+*.log
+hn_venv/
+__pycache__/
+
