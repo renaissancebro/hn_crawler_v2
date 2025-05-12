@@ -4,22 +4,23 @@ import csv
 import time
 import logging
 from datetime import datetime
+from typing import Optional
+from watchdog import run_with_watchdog
 
 TOP_STORIES_URL = 'https://hacker-news.firebaseio.com/v0/topstories.json'
 ITEM_URL = 'https://hacker-news.firebaseio.com/v0/item/{}.json'
-
-# Set up logging
-logging.basicConfig(filename='crawler.log', level=logging.INFO,
-                    format='%(asctime)s %(levelname)s:%(message)s')
 
 def crawl_hn():
     response = requests.get(TOP_STORIES_URL)
     top_story_ids = response.json()[:10]  # Limit for demo
 
-    stories = []
+    stories: list[dict[str, Optional[str]]] = [] #type hint for list of dictionaries containing string values
 
     for idx, sid in enumerate(top_story_ids):
-        print(f"Fetching story {idx + 1}/{len(top_story_ids)} (ID: {sid})")
+        #print(f"Fetching story {idx + 1}/{len(top_story_ids)} (ID: {sid})")
+        msg: str = f"Fetching stroy {idx+1}/{len(top_story_ids)}(ID: {sid})"
+        print(msg)
+        logging.info(msg)
         story = requests.get(ITEM_URL.format(sid)).json()
         if story is None:
             continue
@@ -60,4 +61,4 @@ def crawl_hn():
     logging.info(f"Saved {len(stories)} stories to {filename}")
 
 if __name__ == "__main__":
-    crawl_hn()
+    run_with_watchdog(crawl_hn)
